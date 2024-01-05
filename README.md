@@ -1,4 +1,4 @@
-# Opi CNI is a new CNI for EVPN use case DPUs
+# Opi Gateway EVPN CNI is a new CNI for EVPN use case DPUs
 
 [![Linters](https://github.com/opiproject/opi-gateway-evpn-cni/actions/workflows/linters.yml/badge.svg)](https://github.com/opiproject/opi-gateway-evpn-cni/actions/workflows/linters.yml)
 [![CodeQL](https://github.com/opiproject/opi-gateway-evpn-cni/actions/workflows/codeql.yml/badge.svg)](https://github.com/opiproject/opi-gateway-evpn-cni/actions/workflows/codeql.yml)
