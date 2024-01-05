@@ -13,13 +13,13 @@ RUN go mod download
 # build an app
 COPY cmd/ cmd/
 COPY pkg/ pkg/
-RUN go build -v -o /opi-cni /app/cmd/...
+RUN go build -v -o /opi-gateway-evpn-cni /app/cmd/...
 
 # second stage to reduce image size
 FROM alpine:3.18
 RUN apk add --no-cache --no-check-certificate hwdata && rm -rf /var/cache/apk/*
-COPY --from=builder /opi-cni /
+COPY --from=builder /opi-gateway-evpn-cni /
 COPY --from=docker.io/fullstorydev/grpcurl:v1.8.9-alpine /bin/grpcurl /usr/local/bin/
 EXPOSE 50051 8082
-CMD [ "/opi-cni", "-grpc_port=50051", "-http_port=8082" ]
+CMD [ "/opi-gateway-evpn-cni", "-grpc_port=50051", "-http_port=8082" ]
 HEALTHCHECK CMD grpcurl -plaintext localhost:50051 list || exit 1
