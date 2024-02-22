@@ -1,25 +1,26 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
+# Copyright (C) 2023 Network Plumping Working Group
+# Copyright (C) 2023 Nordix Foundation.
 
-FROM docker.io/library/golang:1.21.6-alpine as builder
+FROM golang:1.20-alpine3.19 as builder
 
-WORKDIR /app
+COPY . /usr/src/evpn-gw-cni
 
-# Download necessary Go modules
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
+ENV HTTP_PROXY $http_proxy
+ENV HTTPS_PROXY $https_proxy
 
-# build an app
-COPY cmd/ cmd/
-# COPY pkg/ pkg/
-RUN go build -v -o /opi-gateway-evpn-cni /app/cmd/...
+WORKDIR /usr/src/evpn-gw-cni
+RUN apk add --no-cache --virtual build-dependencies build-base=~0.5 && \
+    make clean && \
+    make build
 
-# second stage to reduce image size
 FROM alpine:3.19
-RUN apk add --no-cache --no-check-certificate hwdata && rm -rf /var/cache/apk/*
-COPY --from=builder /opi-gateway-evpn-cni /
-COPY --from=docker.io/fullstorydev/grpcurl:v1.8.9-alpine /bin/grpcurl /usr/local/bin/
-EXPOSE 50051 8082
-CMD [ "/opi-gateway-evpn-cni", "-grpc_port=50051", "-http_port=8082" ]
-HEALTHCHECK CMD grpcurl -plaintext localhost:50051 list || exit 1
+COPY --from=builder /usr/src/evpn-gw-cni/build/evpn-gw /usr/bin/
+WORKDIR /
+
+LABEL io.k8s.display-name="EVPN GW CNI"
+
+COPY ./images/entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]
